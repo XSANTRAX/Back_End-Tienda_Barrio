@@ -1,12 +1,12 @@
 package com.tienda.inventario.service.impl;
 
+import com.tienda.inventario.dto.LoginResponseDTO;
 import com.tienda.inventario.dto.UsuarioDTO;
 import com.tienda.inventario.entity.Usuario;
 import com.tienda.inventario.repository.UsuarioRepository;
 import com.tienda.inventario.service.UsuarioService;
 import com.tienda.inventario.util.PasswordUtil;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,22 +75,26 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
    @Override
-    public UsuarioDTO login(String nombreUsuario, String password) {
-        // Buscamos al usuario por su nombre de usuario
+    public LoginResponseDTO login(String nombreUsuario, String password) {
+        // 1. Buscamos al usuario
         Usuario usuario = usuarioRepository.findByNombreUsuario(nombreUsuario)
                 .orElseThrow(() -> new RuntimeException("Credenciales inválidas")); 
                 
-        // Usamos tu PasswordUtil para verificar la contraseña plana contra el hash de la BD
+        // 2. Verificamos contraseña con PasswordUtil
         if (!PasswordUtil.verificar(password, usuario.getPassword())) {
             throw new RuntimeException("Credenciales inválidas");
         }
         
-        // Validamos que el usuario esté activo
+        // 3. Validamos que esté activo
         if (!usuario.getEstado()) {
             throw new RuntimeException("El usuario está inactivo en el sistema");
         }
         
-        return mapearADTO(usuario);
+        // 4. Generamos el token seguro
+        String tokenSeguro = java.util.UUID.randomUUID().toString();
+        
+        // 5. Retornamos el DTO combinado con el token y el usuario mapeado
+        return new LoginResponseDTO(tokenSeguro, mapearADTO(usuario));
     }
 
 

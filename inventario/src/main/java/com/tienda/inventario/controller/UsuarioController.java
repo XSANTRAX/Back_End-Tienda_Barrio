@@ -1,5 +1,6 @@
 package com.tienda.inventario.controller;
 
+import com.tienda.inventario.dto.LoginResponseDTO;
 import com.tienda.inventario.dto.UsuarioDTO;
 import com.tienda.inventario.service.UsuarioService;
 import org.springframework.http.HttpStatus;
@@ -56,9 +57,9 @@ public class UsuarioController {
             String user = credenciales.get("nombreUsuario");
             String pass = credenciales.get("password");
             
-            UsuarioDTO usuarioLogueado = usuarioService.login(user, pass);
+            LoginResponseDTO respuestaLogin = usuarioService.login(user, pass);
             
-            return ResponseEntity.ok(usuarioLogueado);
+            return ResponseEntity.ok(respuestaLogin);
             
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

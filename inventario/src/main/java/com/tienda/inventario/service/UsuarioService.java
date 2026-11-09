@@ -1,5 +1,6 @@
 package com.tienda.inventario.service;
 
+import com.tienda.inventario.dto.LoginResponseDTO;
 import com.tienda.inventario.dto.UsuarioDTO;
 import java.util.List;
 
@@ -10,5 +11,5 @@ public interface UsuarioService {
     UsuarioDTO guardar(UsuarioDTO usuarioDTO);
     UsuarioDTO actualizar(Long idUsuario, UsuarioDTO usuarioDTO);
     void cambiarEstado(Long idUsuario, Boolean estado);
-    UsuarioDTO login(String nombreUsuario, String password);
+    LoginResponseDTO login(String nombreUsuario, String password);
 }
