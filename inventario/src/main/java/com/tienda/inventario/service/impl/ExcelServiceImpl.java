@@ -33,19 +33,17 @@ public class ExcelServiceImpl implements ExcelService {
                 cell.setCellStyle(headerCellStyle);
             }
 
-            // Llenar datos con Reflexión de Java
+            // Llenar datos con Reflexión de Java (Soportando propiedades anidadas con puntos)
             int rowIndex = 1;
             for (T item : listaDatos) {
                 Row row = sheet.createRow(rowIndex++);
                 for (int i = 0; i < camposAtributos.length; i++) {
                     Cell cell = row.createCell(i);
                     try {
-                        Field field = item.getClass().getDeclaredField(camposAtributos[i]);
-                        field.setAccessible(true);
-                        Object valor = field.get(item);
+                        Object valor = obtenerValorAtributo(item, camposAtributos[i]);
                         cell.setCellValue(valor != null ? valor.toString() : "");
                     } catch (Exception e) {
-                        cell.setCellValue("");
+                        cell.setCellValue(""); // Si hay algún error o campo nulo, lo deja vacío con seguridad
                     }
                 }
             }
@@ -60,5 +58,29 @@ public class ExcelServiceImpl implements ExcelService {
         } catch (IOException e) {
             throw new RuntimeException("Error al generar el archivo Excel: " + e.getMessage());
         }
+    }
+
+    // --- MÉTODO CLAVE PARA NAVEGAR ENTRE OBJETOS ANIDADOS (ej: producto.nombreProducto) ---
+    private Object obtenerValorAtributo(Object objeto, String rutaAtributo) throws Exception {
+        for (String parte : rutaAtributo.split("\\.")) {
+            if (objeto == null) return null;
+            Class<?> clase = objeto.getClass();
+            Field field = null;
+            
+            // Buscar el campo subiendo por la jerarquía si es necesario
+            while (clase != null) {
+                try {
+                    field = clase.getDeclaredField(parte);
+                    break;
+                } catch (NoSuchFieldException e) {
+                    clase = clase.getSuperclass();
+                }
+            }
+            
+            if (field == null) return null;
+            field.setAccessible(true);
+            objeto = field.get(objeto);
+        }
+        return objeto;
     }
 }
